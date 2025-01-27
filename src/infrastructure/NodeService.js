@@ -159,6 +159,10 @@ class NodeService {
 						delete node.hostDetail;
 					}
 
+					// Check if light node
+					if ([1,4,5].includes(el.rolesRaw) && el.apiStatus?.isAvailable)
+						node['roles'] = node['roles'] + ' (light)';
+
 					return node;
 				})
 		};

@@ -57,6 +57,14 @@ describe('Node Service', () => {
 		}
 	];
 
+	const nodeFormattedCommonField = {
+		network: 'MAINNET',
+		address: 'NDY2CXBR6SK3G7UWVXZT6YQTVJKHKFMPU74ZOYY',
+		nodePublicKey:
+			'016DC1622EE42EF9E4D215FA1112E89040DD7AED83007283725CE9BA550272F5',
+		version: '1.0.3.5'
+	};
+
 	const runStatisticServiceFailResponseTests = (statisticServiceMethod, NodeServiceMethod) => {
 		it('throws error when statistic services fail response', async () => {
 			// Arrange:
@@ -82,14 +90,6 @@ describe('Node Service', () => {
 				};
 			});
 
-			const expectNodeFormattedCommonField = {
-				network: 'MAINNET',
-				address: 'NDY2CXBR6SK3G7UWVXZT6YQTVJKHKFMPU74ZOYY',
-				nodePublicKey:
-					'016DC1622EE42EF9E4D215FA1112E89040DD7AED83007283725CE9BA550272F5',
-				version: '1.0.3.5'
-			};
-
 			// Act:
 			const result = await NodeService.getAvailableNodes();
 
@@ -97,7 +97,7 @@ describe('Node Service', () => {
 			expect(result).toEqual([
 				{
 					...nodeCommonField,
-					...expectNodeFormattedCommonField,
+					...nodeFormattedCommonField,
 					apiEndpoint: 'N/A',
 					roles: 'Peer node',
 					rolesRaw: 1,
@@ -105,7 +105,7 @@ describe('Node Service', () => {
 				},
 				{
 					...nodeCommonField,
-					...expectNodeFormattedCommonField,
+					...nodeFormattedCommonField,
 					apiEndpoint: 'localhost.com',
 					roles: 'Peer Api node',
 					rolesRaw: 3,
@@ -114,7 +114,7 @@ describe('Node Service', () => {
 				},
 				{
 					...nodeCommonField,
-					...expectNodeFormattedCommonField,
+					...nodeFormattedCommonField,
 					apiEndpoint: 'localhost.com',
 					roles: 'Peer Api node',
 					rolesRaw: 3,
@@ -123,7 +123,7 @@ describe('Node Service', () => {
 				},
 				{
 					...nodeCommonField,
-					...expectNodeFormattedCommonField,
+					...nodeFormattedCommonField,
 					apiEndpoint: 'N/A',
 					roles: 'Peer Voting node',
 					rolesRaw: 5,
@@ -131,7 +131,7 @@ describe('Node Service', () => {
 				},
 				{
 					...nodeCommonField,
-					...expectNodeFormattedCommonField,
+					...nodeFormattedCommonField,
 					apiEndpoint: 'localhost.com',
 					roles: 'Peer Api Voting node',
 					rolesRaw: 7,
@@ -270,5 +270,45 @@ describe('Node Service', () => {
 		[1, 4, 5].forEach(roles => runLightRestNodeTests(roles));
 
 		runStatisticServiceFailResponseTests('getNode', 'getNodeInfo');
+	});
+
+	describe('getAvailableNodeList', () => {
+		const assertNodeRolesName = async (node, expectedResult) => {
+			// Arrange:
+			jest.spyOn(NodeService, 'getAvailableNodes')
+				.mockReturnValue(Promise.resolve([node]));
+
+			// Act:
+			const result = await NodeService.getAvailableNodeList({
+				rolesRaw: null
+			});
+
+			// Assert:
+			expect(result.data[0].roles).toEqual(expectedResult);
+		};
+
+		it('returns roles name with API node' , async () => {
+			[2,3,6,7].forEach(role => assertNodeRolesName({
+				...nodeCommonField,
+				...nodeFormattedCommonField,
+				apiEndpoint: 'N/A',
+				roles: 'API node',
+				rolesRaw: role,
+				peerStatus: generateNodePeerStatus(true),
+				apiStatus: generateNodeApiStatus(true)
+			}, 'API node'));
+		});
+
+		it('returns roles name with (light) keywords for Peer node', async () => {
+			[1,4,5].forEach(role => assertNodeRolesName({
+				...nodeCommonField,
+				...nodeFormattedCommonField,
+				apiEndpoint: 'N/A',
+				roles: 'Peer node',
+				rolesRaw: role,
+				peerStatus: generateNodePeerStatus(true),
+				apiStatus: generateNodeApiStatus(true)
+			}, 'Peer node (light)'));
+		});
 	});
 });

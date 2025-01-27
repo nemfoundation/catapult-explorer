@@ -10,7 +10,9 @@ import leaflet from 'leaflet';
 import markerCluster from 'leaflet.markercluster'; // eslint-disable-line
 import IconOrange from '../styles/img/connector_orange.png';
 import IconBlue from '../styles/img/connector_blue.png';
+import IconBlueLight from '../styles/img/connector_blue_light.png';
 import IconGreen from '../styles/img/connector_green.png';
+import IconGreenLight from '../styles/img/connector_green_light.png';
 import IconPink from '../styles/img/connector_pink.png';
 
 export default {
@@ -144,7 +146,9 @@ export default {
 			};
 
 			const iconPeer = getIcon(IconBlue);
+			const iconPeerLight = getIcon(IconBlueLight);
 			const iconVoting = getIcon(IconGreen);
+			const iconVotingLight = getIcon(IconGreenLight);
 			const iconApi = getIcon(IconPink);
 			const iconApiVoting = getIcon(IconOrange);
 
@@ -170,13 +174,16 @@ export default {
 					let icon = iconPeer;
 
 					switch (node.rolesRaw) {
+					case 1:
+						icon = node.apiStatus?.isAvailable ? iconPeerLight : iconPeer;
+						break;
 					case 2:
 					case 3:
 						icon = iconApi;
 						break;
 					case 4:
 					case 5:
-						icon = iconVoting;
+						icon = node.apiStatus?.isAvailable ? iconVotingLight : iconVoting;
 						break;
 					case 6:
 					case 7:
